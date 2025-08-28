@@ -13,6 +13,7 @@ export default function FlowBuilder() {
   const { screenToFlowPosition } = useReactFlow();
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
+  const [flowName, setFlowName] = useState('');
   const [nodeIdCounter, setNodeIdCounter] = useState(1);
   const [selectedNode, setSelectedNode] = useState(null);
   const navigate = useNavigate();
@@ -21,11 +22,12 @@ export default function FlowBuilder() {
     const storedFlows = JSON.parse(localStorage.getItem("flows")) || [];
     const pathId = window.location.pathname.replace('/', '');
     const currentFlow = storedFlows.find(flow => flow.id === pathId);
-    console.log('Current Flow:', currentFlow);
+
     if (currentFlow) {
       setNodes(currentFlow.nodes);
       setEdges(currentFlow.edges);
       setNodeIdCounter(currentFlow.nodes.length + 1);
+      setFlowName(currentFlow.name);
     }
   }, []);
 
@@ -54,7 +56,10 @@ export default function FlowBuilder() {
   };
 
   const validateFlow = () => {
-    if (nodes.length <= 1) return null;
+    if (nodes.length < 1) {
+      window.alert('Error: The flow must contain at least one node.');
+      return false;
+    }
 
     const nodesWithoutIncoming = nodes.filter(node => 
       !edges.some(edge => edge.target === node.id)
@@ -140,7 +145,7 @@ export default function FlowBuilder() {
   return (
     <div>
       <div className='top-bar'>
-        <Topbar handleSave={handleSave} />
+        <Topbar handleSave={handleSave} name={flowName} />
       </div>
       <div className='main-content flex'>
         <Toolbar onAddNode={addNode} />
